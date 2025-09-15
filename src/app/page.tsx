@@ -13,15 +13,29 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Switch } from "@/components/ui/switch"
 import { Search, Users, Heart, Activity, TrendingUp, DollarSign, Star, Eye, EyeOff, Mail, Shield, FileText, ClipboardList } from "lucide-react"
+import { QuestionnaireAnalysis } from "@/components/questionnaire-analysis"
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview")
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
   const [showEmails, setShowEmails] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedParticipant, setSelectedParticipant] = useState(null)
-  const [questionnaireData, setQuestionnaireData] = useState(null)
-  const [isQuestionnaireModalOpen, setIsQuestionnaireModalOpen] = useState(false)
+  const [analysisData, setAnalysisData] = useState<any>(null)
+
+  // Fetch analysis data when component mounts
+  useEffect(() => {
+    const fetchAnalysisData = async () => {
+      try {
+        const response = await fetch('/api/responses?analysis=true')
+        const data = await response.json()
+        setAnalysisData(data.analysis)
+      } catch (error) {
+        console.error('Failed to fetch analysis data:', error)
+      }
+    }
+
+    fetchAnalysisData()
+  }, [])
 
   // Enhanced participant data with questionnaire info
   const participants = [
@@ -414,7 +428,7 @@ export default function Dashboard() {
                               ) : (
                                 <div className="flex items-center gap-2">
                                   <span className="text-sm text-muted-foreground">
-                                    {participant.email.split('@')[0].substring(0, 3)}***@{participant.email.split('@')[1].split('.')[0]}***
+                                    {participant.email.split('@')[0].substring(0, 3)}***@{participant.email.split('@')[1].substring(0, 3)}***
                                   </span>
                                   <Button
                                     variant="ghost"
@@ -586,13 +600,14 @@ export default function Dashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 h-auto p-1 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg shadow-sm">
+          <TabsList className="grid w-full grid-cols-7 h-auto p-1 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-lg shadow-sm">
             <TabsTrigger value="overview" className="data-[state=active]:gradient-bg data-[state=active]:text-white">Overview</TabsTrigger>
             <TabsTrigger value="metrics" className="data-[state=active]:gradient-bg data-[state=active]:text-white">Metrics</TabsTrigger>
             <TabsTrigger value="cases" className="data-[state=active]:gradient-bg data-[state=active]:text-white">Case Studies</TabsTrigger>
             <TabsTrigger value="feedback" className="data-[state=active]:gradient-bg data-[state=active]:text-white">Feedback</TabsTrigger>
             <TabsTrigger value="technical" className="data-[state=active]:gradient-bg data-[state=active]:text-white">Technical</TabsTrigger>
             <TabsTrigger value="impact" className="data-[state=active]:gradient-bg data-[state=active]:text-white">Impact</TabsTrigger>
+            <TabsTrigger value="questionnaire" className="data-[state=active]:gradient-bg data-[state=active]:text-white">Questionnaire</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
@@ -1029,6 +1044,28 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Questionnaire Tab */}
+          <TabsContent value="questionnaire" className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-3xl font-bold gradient-text mb-2">Questionnaire Analysis</h2>
+              <p className="text-muted-foreground">
+                IRB-standard and HIPAA-compliant questionnaire responses and analysis
+              </p>
+            </div>
+
+            {analysisData ? (
+              <QuestionnaireAnalysis data={analysisData} />
+            ) : (
+              <div className="text-center py-12">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Loading Analysis</h3>
+                <p className="text-muted-foreground mb-4">
+                  Fetching questionnaire data and generating insights...
+                </p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
