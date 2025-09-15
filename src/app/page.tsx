@@ -314,23 +314,6 @@ export default function Dashboard() {
     { category: "Time Saved", value: "382 hours", description: "4.2 hours per family monthly", icon: "⏰" },
   ]
 
-  // Sample participant data for the user list
-  const participants = [
-    { id: 1, name: "Sarah Johnson", email: "sarah.johnson@email.com", familySize: 3, joinDate: "2025-08-02", usage: "High" },
-    { id: 2, name: "Michael Chen", email: "michael.chen@email.com", familySize: 4, joinDate: "2025-08-02", usage: "High" },
-    { id: 3, name: "Emily Rodriguez", email: "emily.rodriguez@email.com", familySize: 4, joinDate: "2025-08-03", usage: "Medium" },
-    { id: 4, name: "David Thompson", email: "david.thompson@email.com", familySize: 2, joinDate: "2025-08-03", usage: "Medium" },
-    { id: 5, name: "Maria Garcia", email: "maria.garcia@email.com", familySize: 4, joinDate: "2025-08-04", usage: "High" },
-    { id: 6, name: "James Wilson", email: "james.wilson@email.com", familySize: 3, joinDate: "2025-08-04", usage: "Medium" },
-    { id: 7, name: "Lisa Anderson", email: "lisa.anderson@email.com", familySize: 4, joinDate: "2025-08-05", usage: "High" },
-    { id: 8, name: "Robert Kim", email: "robert.kim@email.com", familySize: 4, joinDate: "2025-08-05", usage: "Medium" },
-  ]
-
-  const filteredParticipants = participants.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.email.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
