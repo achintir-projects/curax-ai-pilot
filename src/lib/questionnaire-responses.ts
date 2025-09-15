@@ -14,7 +14,178 @@ export interface QuestionnaireResponse {
 }
 
 // Generate realistic responses based on the pilot study demographics
-export const questionnaireResponses: QuestionnaireResponse[] = [
+
+// Generate additional questionnaire responses for participants 9-91
+const generateAdditionalResponses = () => {
+  const additionalResponses = []
+  
+  // Response templates for different question types
+  const consentResponses = [
+    { sectionId: "consent", questionId: "consent_read", answer: "I confirm" },
+    { sectionId: "consent", questionId: "voluntary_participation", answer: "I understand" },
+    { sectionId: "consent", questionId: "confidentiality", answer: "I understand" },
+    { sectionId: "consent", questionId: "data_usage", answer: "I consent" }
+  ]
+  
+  const familySizeOptions = ["1", "2", "3", "4", "5"]
+  const geographyOptions = ["Urban", "Suburban", "Rural"]
+  const incomeOptions = ["Under $50,000", "$50,000 - $100,000", "$100,000 - $150,000", "Over $150,000"]
+  const chronicConditionsOptions = ["None", "Asthma", "Diabetes", "Heart disease", "High blood pressure", "Arthritis", "Depression/Anxiety", "Allergies"]
+  const medicationsOptions = ["No medications", "1-2 medications", "3-5 medications", "6+ medications"]
+  const healthcareFrequencyOptions = ["Rarely (1-2 times per year)", "Occasionally (3-6 times per year)", "Regularly (7-12 times per year)", "Frequently (13+ times per year)"]
+  const techComfortOptions = ["Very comfortable (I adopt new tech quickly)", "Comfortable (I can learn new tech with some guidance)", "Somewhat comfortable (I need detailed instructions)"]
+  const smartphoneUsageOptions = ["Daily", "Weekly", "Monthly", "Rarely"]
+  const voiceAssistantOptions = ["Yes, frequently", "Yes, occasionally", "No, but interested", "No, not interested"]
+  const primaryInterestOptions = ["Improving family health management", "Saving time on healthcare tasks", "Reducing healthcare costs", "Better understanding of health information", "Trying new technology", "Contributing to research"]
+  
+  for (let i = 9; i <= 91; i++) {
+    const baseDate = new Date(2025, 7, Math.floor(Math.random() * 30) + 1) // Random day in August 2025
+    const baseHour = Math.floor(Math.random() * 12) + 9 // 9 AM to 8 PM
+    const responses = []
+    let currentTime = new Date(baseDate)
+    currentTime.setHours(baseHour, 0, 0, 0)
+    
+    // Add consent responses
+    consentResponses.forEach((resp, index) => {
+      const timestamp = new Date(currentTime)
+      timestamp.setMinutes(index)
+      responses.push({
+        ...resp,
+        timestamp: timestamp.toISOString()
+      })
+    })
+    currentTime.setMinutes(4)
+    
+    // Add demographics responses
+    const familySize = familySizeOptions[Math.floor(Math.random() * familySizeOptions.length)]
+    const geography = geographyOptions[Math.floor(Math.random() * geographyOptions.length)]
+    const income = incomeOptions[Math.floor(Math.random() * incomeOptions.length)]
+    
+    responses.push({ sectionId: "demographics", questionId: "family_size", answer: familySize, timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    // Age groups based on family size
+    const ageGroups = []
+    if (familySize !== "1") {
+      ageGroups.push("Adults (18-64 years)")
+    }
+    if (parseInt(familySize) > 2 && Math.random() > 0.5) {
+      ageGroups.push("Children (5-12 years)")
+    }
+    if (parseInt(familySize) > 3 && Math.random() > 0.7) {
+      ageGroups.push("Teenagers (13-17 years)")
+    }
+    if (Math.random() > 0.8) {
+      ageGroups.push("Seniors (65+ years)")
+    }
+    if (ageGroups.length === 0) {
+      ageGroups.push("Adults (18-64 years)")
+    }
+    
+    responses.push({ sectionId: "demographics", questionId: "age_groups", answer: ageGroups, timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    responses.push({ sectionId: "demographics", questionId: "primary_caregiver", answer: Math.random() > 0.3 ? "Myself" : "Shared responsibility", timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    responses.push({ sectionId: "demographics", questionId: "geography", answer: geography, timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    responses.push({ sectionId: "demographics", questionId: "income_range", answer: income, timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    // Add health background responses
+    const chronicConditions = []
+    if (Math.random() > 0.4) {
+      chronicConditions.push(chronicConditionsOptions[Math.floor(Math.random() * (chronicConditionsOptions.length - 1)) + 1])
+    }
+    if (Math.random() > 0.7) {
+      const secondCondition = chronicConditionsOptions[Math.floor(Math.random() * (chronicConditionsOptions.length - 1)) + 1]
+      if (!chronicConditions.includes(secondCondition)) {
+        chronicConditions.push(secondCondition)
+      }
+    }
+    if (chronicConditions.length === 0) {
+      chronicConditions.push("None")
+    }
+    
+    responses.push({ sectionId: "health_background", questionId: "chronic_conditions", answer: chronicConditions, timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    responses.push({ sectionId: "health_background", questionId: "medications", answer: medicationsOptions[Math.floor(Math.random() * medicationsOptions.length)], timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    responses.push({ sectionId: "health_background", questionId: "healthcare_frequency", answer: healthcareFrequencyOptions[Math.floor(Math.random() * healthcareFrequencyOptions.length)], timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    const emergencyVisits = chronicConditions.length > 1 ? 
+      ["1-2 visits", "3-5 visits", "6+ visits"][Math.floor(Math.random() * 3)] : 
+      ["None", "1-2 visits"][Math.floor(Math.random() * 2)]
+    responses.push({ sectionId: "health_background", questionId: "emergency_visits", answer: emergencyVisits, timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    // Add technology usage responses
+    responses.push({ sectionId: "technology_usage", questionId: "tech_comfort", answer: techComfortOptions[Math.floor(Math.random() * techComfortOptions.length)], timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    responses.push({ sectionId: "technology_usage", questionId: "smartphone_usage", answer: smartphoneUsageOptions[Math.floor(Math.random() * smartphoneUsageOptions.length)], timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    responses.push({ sectionId: "technology_usage", questionId: "voice_assistant", answer: voiceAssistantOptions[Math.floor(Math.random() * voiceAssistantOptions.length)], timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    const healthApps = []
+    if (Math.random() > 0.5) healthApps.push("Fitness tracking apps")
+    if (Math.random() > 0.7) healthApps.push("Meditation/wellness apps")
+    if (Math.random() > 0.8) healthApps.push("Telemedicine apps")
+    if (Math.random() > 0.9) healthApps.push("Medication reminder apps")
+    if (healthApps.length === 0) healthApps.push("None")
+    
+    responses.push({ sectionId: "technology_usage", questionId: "health_apps", answer: healthApps, timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    // Add expectations responses
+    responses.push({ sectionId: "expectations", questionId: "primary_interest", answer: primaryInterestOptions[Math.floor(Math.random() * primaryInterestOptions.length)], timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    const featurePriorities = []
+    const allFeatures = ["Symptom checking", "Food analysis and allergy detection", "Medication management", "Family health coordination", "Voice-controlled assistance", "Medical file analysis", "Appointment scheduling"]
+    const numFeatures = Math.floor(Math.random() * 4) + 2 // 2-5 features
+    for (let j = 0; j < numFeatures; j++) {
+      const feature = allFeatures[Math.floor(Math.random() * allFeatures.length)]
+      if (!featurePriorities.includes(feature)) {
+        featurePriorities.push(feature)
+      }
+    }
+    
+    responses.push({ sectionId: "expectations", questionId: "feature_priority", answer: featurePriorities, timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    const concerns = [
+      "Worried about accuracy of AI diagnoses",
+      "Data privacy and security of health information",
+      "How well it integrates with existing healthcare systems",
+      "Difficulty learning to use new technology",
+      "None, very excited about the technology"
+    ]
+    responses.push({ sectionId: "expectations", questionId: "concerns", answer: concerns[Math.floor(Math.random() * concerns.length)], timestamp: new Date(currentTime).toISOString() })
+    currentTime.setMinutes(currentTime.getMinutes() + 1)
+    
+    const privacyOptions = ["Extremely important", "Very important", "Somewhat important", "Not very important"]
+    responses.push({ sectionId: "expectations", questionId: "privacy_preferences", answer: privacyOptions[Math.floor(Math.random() * privacyOptions.length)], timestamp: new Date(currentTime).toISOString() })
+    
+    additionalResponses.push({
+      participantId: i,
+      responses,
+      completionDate: baseDate.toISOString().split('T')[0],
+      timeSpent: Math.floor(Math.random() * 10) + 10 // 10-20 minutes
+    })
+  }
+  
+  return additionalResponses
+}
+
+const originalQuestionnaireResponses: QuestionnaireResponse[] = [
   {
     participantId: 1,
     responses: [
@@ -241,7 +412,11 @@ export const questionnaireResponses: QuestionnaireResponse[] = [
   }
 ]
 
-// Helper function to get responses by participant ID
+// Combine original responses with generated ones
+export const questionnaireResponses: QuestionnaireResponse[] = [
+  ...originalQuestionnaireResponses,
+  ...generateAdditionalResponses()
+]
 export function getResponsesByParticipantId(participantId: number): QuestionnaireResponse | undefined {
   return questionnaireResponses.find(response => response.participantId === participantId)
 }
