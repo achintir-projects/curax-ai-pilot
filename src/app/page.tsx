@@ -11,11 +11,13 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Users, Heart, Activity, TrendingUp, DollarSign, Star } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { Search, Users, Heart, Activity, TrendingUp, DollarSign, Star, Eye, EyeOff, Mail, Shield } from "lucide-react"
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview")
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
+  const [showEmails, setShowEmails] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
 
   // Key metrics data
@@ -221,6 +223,28 @@ export default function Dashboard() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
+                  {/* Email Privacy Control */}
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center gap-3">
+                      <Shield className="h-5 w-5 text-blue-600" />
+                      <div>
+                        <div className="font-medium text-sm">Email Privacy</div>
+                        <div className="text-xs text-muted-foreground">
+                          {showEmails ? "Email addresses are visible" : "Email addresses are hidden for privacy"}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <EyeOff className={`h-4 w-4 ${!showEmails ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <Switch
+                        checked={showEmails}
+                        onCheckedChange={setShowEmails}
+                        className="data-[state=checked]:bg-blue-600"
+                      />
+                      <Eye className={`h-4 w-4 ${showEmails ? 'text-blue-600' : 'text-gray-400'}`} />
+                    </div>
+                  </div>
+
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
@@ -235,7 +259,18 @@ export default function Dashboard() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Name</TableHead>
-                          <TableHead>Email</TableHead>
+                          <TableHead>
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4" />
+                              Email
+                              {!showEmails && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Shield className="h-3 w-3 mr-1" />
+                                  Hidden
+                                </Badge>
+                              )}
+                            </div>
+                          </TableHead>
                           <TableHead>Family Size</TableHead>
                           <TableHead>Join Date</TableHead>
                           <TableHead>Usage Level</TableHead>
@@ -245,7 +280,26 @@ export default function Dashboard() {
                         {filteredParticipants.map((participant) => (
                           <TableRow key={participant.id}>
                             <TableCell className="font-medium">{participant.name}</TableCell>
-                            <TableCell>{participant.email}</TableCell>
+                            <TableCell>
+                              {showEmails ? (
+                                <span className="text-sm">{participant.email}</span>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-muted-foreground">
+                                    {participant.email.split('@')[0].substring(0, 3)}***@{participant.email.split('@')[1]}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 w-6 p-0"
+                                    onClick={() => setShowEmails(true)}
+                                    title="Show email"
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              )}
+                            </TableCell>
                             <TableCell>{participant.familySize} members</TableCell>
                             <TableCell>{participant.joinDate}</TableCell>
                             <TableCell>
@@ -263,6 +317,12 @@ export default function Dashboard() {
                   </ScrollArea>
                   <div className="text-sm text-muted-foreground text-center">
                     Showing {filteredParticipants.length} of {participants.length} participants
+                    {!showEmails && (
+                      <div className="mt-2 text-xs">
+                        <Shield className="inline h-3 w-3 mr-1" />
+                        Email addresses are masked for privacy protection
+                      </div>
+                    )}
                   </div>
                 </div>
               </DialogContent>

@@ -95,12 +95,20 @@ const participants = [
   { id: 91, name: "Elena Petersen", email: "elena.petersen@email.com" }
 ]
 
+// Helper function to mask email addresses
+function maskEmail(email: string): string {
+  const [localPart, domain] = email.split('@')
+  const visiblePart = localPart.substring(0, 3)
+  return `${visiblePart}***@${domain}`
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     const search = searchParams.get('search') || ''
+    const showEmails = searchParams.get('showEmails') === 'true'
 
     // Filter participants based on search query
     let filteredParticipants = participants
@@ -111,10 +119,17 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Apply email privacy setting
+    const participantsWithEmailPrivacy = filteredParticipants.map(p => ({
+      ...p,
+      email: showEmails ? p.email : maskEmail(p.email),
+      fullEmail: showEmails ? p.email : undefined // Include full email only when requested
+    }))
+
     // Pagination
     const startIndex = (page - 1) * limit
     const endIndex = startIndex + limit
-    const paginatedParticipants = filteredParticipants.slice(startIndex, endIndex)
+    const paginatedParticipants = participantsWithEmailPrivacy.slice(startIndex, endIndex)
 
     return NextResponse.json({
       participants: paginatedParticipants,
@@ -123,6 +138,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(filteredParticipants.length / limit),
         totalParticipants: filteredParticipants.length,
         hasMore: endIndex < filteredParticipants.length
+      },
+      privacy: {
+        emailsVisible: showEmails,
+        maskedCount: showEmails ? 0 : filteredParticipants.length
       }
     })
   } catch (error) {
