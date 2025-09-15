@@ -99,7 +99,8 @@ const participants = [
 function maskEmail(email: string): string {
   const [localPart, domain] = email.split('@')
   const visiblePart = localPart.substring(0, 3)
-  return `${visiblePart}***@${domain}`
+  const maskedDomain = domain.substring(0, domain.indexOf('.')) + '***'
+  return `${visiblePart}***@${maskedDomain}`
 }
 
 export async function GET(request: NextRequest) {

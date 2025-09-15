@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -12,15 +12,140 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Switch } from "@/components/ui/switch"
-import { Search, Users, Heart, Activity, TrendingUp, DollarSign, Star, Eye, EyeOff, Mail, Shield } from "lucide-react"
+import { Search, Users, Heart, Activity, TrendingUp, DollarSign, Star, Eye, EyeOff, Mail, Shield, FileText, ClipboardList } from "lucide-react"
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("overview")
   const [isUserModalOpen, setIsUserModalOpen] = useState(false)
   const [showEmails, setShowEmails] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedParticipant, setSelectedParticipant] = useState(null)
+  const [questionnaireData, setQuestionnaireData] = useState(null)
+  const [isQuestionnaireModalOpen, setIsQuestionnaireModalOpen] = useState(false)
 
-  // Key metrics data
+  // Enhanced participant data with questionnaire info
+  const participants = [
+    { 
+      id: 1, 
+      name: "Sarah Johnson", 
+      email: "sarah.johnson@email.com", 
+      familySize: 3, 
+      joinDate: "2025-08-02", 
+      usage: "High",
+      techComfort: "High",
+      hasChronicConditions: false,
+      hasAllergies: true,
+      completionTime: 15
+    },
+    { 
+      id: 2, 
+      name: "Michael Chen", 
+      email: "michael.chen@email.com", 
+      familySize: 4, 
+      joinDate: "2025-08-02", 
+      usage: "High",
+      techComfort: "High",
+      hasChronicConditions: true,
+      hasAllergies: false,
+      completionTime: 18
+    },
+    { 
+      id: 3, 
+      name: "Emily Rodriguez", 
+      email: "emily.rodriguez@email.com", 
+      familySize: 4, 
+      joinDate: "2025-08-03", 
+      usage: "Medium",
+      techComfort: "Medium",
+      hasChronicConditions: false,
+      hasAllergies: true,
+      completionTime: 12
+    },
+    { 
+      id: 4, 
+      name: "David Thompson", 
+      email: "david.thompson@email.com", 
+      familySize: 2, 
+      joinDate: "2025-08-03", 
+      usage: "Medium",
+      techComfort: "Medium",
+      hasChronicConditions: true,
+      hasAllergies: false,
+      completionTime: 14
+    },
+    { 
+      id: 5, 
+      name: "Maria Garcia", 
+      email: "maria.garcia@email.com", 
+      familySize: 4, 
+      joinDate: "2025-08-04", 
+      usage: "High",
+      techComfort: "High",
+      hasChronicConditions: false,
+      hasAllergies: true,
+      completionTime: 16
+    },
+    { 
+      id: 6, 
+      name: "James Wilson", 
+      email: "james.wilson@email.com", 
+      familySize: 3, 
+      joinDate: "2025-08-04", 
+      usage: "Medium",
+      techComfort: "Medium",
+      hasChronicConditions: false,
+      hasAllergies: false,
+      completionTime: 13
+    },
+    { 
+      id: 7, 
+      name: "Lisa Anderson", 
+      email: "lisa.anderson@email.com", 
+      familySize: 4, 
+      joinDate: "2025-08-05", 
+      usage: "High",
+      techComfort: "High",
+      hasChronicConditions: true,
+      hasAllergies: true,
+      completionTime: 19
+    },
+    { 
+      id: 8, 
+      name: "Robert Kim", 
+      email: "robert.kim@email.com", 
+      familySize: 4, 
+      joinDate: "2025-08-05", 
+      usage: "Medium",
+      techComfort: "Medium",
+      hasChronicConditions: false,
+      hasAllergies: false,
+      completionTime: 11
+    },
+  ]
+
+  const filteredParticipants = participants.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.email.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  // Fetch questionnaire data
+  useEffect(() => {
+    const fetchQuestionnaire = async () => {
+      try {
+        const response = await fetch('/api/questionnaire')
+        const data = await response.json()
+        setQuestionnaireData(data.questionnaire)
+      } catch (error) {
+        console.error('Failed to fetch questionnaire:', error)
+      }
+    }
+    fetchQuestionnaire()
+  }, [])
+
+  const handleViewQuestionnaire = (participant) => {
+    setSelectedParticipant(participant)
+    setIsQuestionnaireModalOpen(true)
+  }
   const keyMetrics = [
     { title: "Total Families", value: "91", description: "Pilot study participants", icon: Users, color: "text-blue-600" },
     { title: "Total Users", value: "247", description: "Across all families", icon: Users, color: "text-purple-600" },
@@ -272,8 +397,11 @@ export default function Dashboard() {
                             </div>
                           </TableHead>
                           <TableHead>Family Size</TableHead>
+                          <TableHead>Tech Comfort</TableHead>
+                          <TableHead>Health Profile</TableHead>
                           <TableHead>Join Date</TableHead>
                           <TableHead>Usage Level</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -286,7 +414,7 @@ export default function Dashboard() {
                               ) : (
                                 <div className="flex items-center gap-2">
                                   <span className="text-sm text-muted-foreground">
-                                    {participant.email.split('@')[0].substring(0, 3)}***@{participant.email.split('@')[1]}
+                                    {participant.email.split('@')[0].substring(0, 3)}***@{participant.email.split('@')[1].split('.')[0]}***
                                   </span>
                                   <Button
                                     variant="ghost"
@@ -301,6 +429,27 @@ export default function Dashboard() {
                               )}
                             </TableCell>
                             <TableCell>{participant.familySize} members</TableCell>
+                            <TableCell>
+                              <Badge variant={
+                                participant.techComfort === "High" ? "default" : 
+                                participant.techComfort === "Medium" ? "secondary" : "outline"
+                              }>
+                                {participant.techComfort}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                {participant.hasChronicConditions && (
+                                  <Badge variant="destructive" className="text-xs">Chronic</Badge>
+                                )}
+                                {participant.hasAllergies && (
+                                  <Badge variant="outline" className="text-xs">Allergies</Badge>
+                                )}
+                                {!participant.hasChronicConditions && !participant.hasAllergies && (
+                                  <Badge variant="secondary" className="text-xs">Healthy</Badge>
+                                )}
+                              </div>
+                            </TableCell>
                             <TableCell>{participant.joinDate}</TableCell>
                             <TableCell>
                               <Badge variant={
@@ -309,6 +458,19 @@ export default function Dashboard() {
                               }>
                                 {participant.usage}
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => handleViewQuestionnaire(participant)}
+                                  title="View questionnaire"
+                                >
+                                  <ClipboardList className="h-3 w-3" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -324,6 +486,99 @@ export default function Dashboard() {
                       </div>
                     )}
                   </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            {/* Questionnaire Modal */}
+            <Dialog open={isQuestionnaireModalOpen} onOpenChange={setIsQuestionnaireModalOpen}>
+              <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+                <DialogHeader>
+                  <DialogTitle className="gradient-text flex items-center gap-2">
+                    <ClipboardList className="h-5 w-5" />
+                    Questionnaire Responses - {selectedParticipant?.name}
+                  </DialogTitle>
+                  <DialogDescription>
+                    IRB-compliant questionnaire responses and study information
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6">
+                  {/* Participant Info */}
+                  {selectedParticipant && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                      <div className="text-center">
+                        <div className="text-sm text-muted-foreground">Family Size</div>
+                        <div className="font-semibold">{selectedParticipant.familySize} members</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-muted-foreground">Tech Comfort</div>
+                        <div className="font-semibold">{selectedParticipant.techComfort}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-muted-foreground">Completion Time</div>
+                        <div className="font-semibold">{selectedParticipant.completionTime} minutes</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-sm text-muted-foreground">Usage Level</div>
+                        <div className="font-semibold">{selectedParticipant.usage}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Questionnaire Sections */}
+                  {questionnaireData && (
+                    <ScrollArea className="h-[600px] rounded-md border">
+                      <div className="space-y-6 p-6">
+                        {questionnaireData.sections.map((section, sectionIndex) => (
+                          <Card key={sectionIndex} className="card-hover">
+                            <CardHeader>
+                              <CardTitle className="text-lg flex items-center gap-2">
+                                <FileText className="h-5 w-5" />
+                                {section.title}
+                                {section.isRequired && (
+                                  <Badge variant="destructive" className="text-xs">Required</Badge>
+                                )}
+                              </CardTitle>
+                              <CardDescription>{section.description}</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              {section.questions.map((question, questionIndex) => (
+                                <div key={questionIndex} className="space-y-2">
+                                  <div className="flex items-start gap-2">
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                      {questionIndex + 1}.
+                                    </span>
+                                    <div className="flex-1">
+                                      <div className="text-sm font-medium">
+                                        {question.text}
+                                        {question.required && (
+                                          <span className="text-red-500 ml-1">*</span>
+                                        )}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground mb-2">
+                                        Type: {question.type}
+                                      </div>
+                                      <div className="flex flex-wrap gap-1">
+                                        {question.options?.map((option, optionIndex) => (
+                                          <Badge 
+                                            key={optionIndex} 
+                                            variant="outline" 
+                                            className="text-xs"
+                                          >
+                                            {option}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
                 </div>
               </DialogContent>
             </Dialog>
